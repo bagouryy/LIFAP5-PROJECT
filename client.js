@@ -192,6 +192,8 @@ function initClientCitations() {
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Exécution du code après chargement de la page");
     initClientCitations();
+    getCitations();
+    afficheDuels();
 });
 
 
@@ -200,169 +202,153 @@ document.addEventListener("DOMContentLoaded", () => {
  Par exemple avec un `.map` qui va transformer chaque citation en string contenant la ligne du tableau HTML, 
  puis en utilisant `join("")` pour assembler toutes les chaînes en une seule */
 
-fetch("https://lifap5.univ-lyon1.fr/citations", { method: 'GET', headers: { "x-api-key": apiKey } })
-    .then((response) => response.json())
-    .then(data => {
-
-        console.log(data)
-        if (data.length > 0) {
-
-            var temp = "";
-            var classement = 0;
-
-            data.forEach((u) => {
-
-                temp += "<tr>";
-                temp += "<td>" + ++classement + "</td>";
-                temp += "<td>" + u.character + "</td>";
-                temp += "<td id=\"test\"> " + u._id + " </td>";
-                temp += "<td id=\"baba\" onclick=\"afficheDetails()\">" + u.quote + "</td></tr>";
+function getCitations() {
 
 
+    console.log("CALL getCitations");
+    var tableBody = "";
+    var classement = 0;
 
-
-            })
-
-            document.getElementById("data").innerHTML = temp;
-
-
-
-        }
-    })
-    .catch((erreur) => ({ err: erreur }));
-
-
-// Affichage d’un duel aléatoire sur le tab Voter
-
-fetch("https://lifap5.univ-lyon1.fr/citations", {
-        method: 'GET',
-        headers: { "x-api-key": apiKey }
-    })
-    .then((response) => response.json())
-    .then(data => {
-
-        console.log(data)
-        if (data.length > 0) {
-
-            var x = Math.floor(Math.random() * data.length);
-            var y = Math.floor(Math.random() * data.length);
-
-            var pic1 = document.getElementById("pic1");
-            var pic2 = document.getElementById("pic2");
-
-
-
-            document.getElementById("quote1").innerHTML = data[x].quote;
-            document.getElementById("quote2").innerHTML = data[y].quote;
-            document.getElementById("author1").innerHTML = data[x].character + "dans" + data[x].origin;
-            document.getElementById("author2").innerHTML = data[y].character + "dans" + data[y].origin;
-
-            pic1.setAttribute("src", data[x].image);
-            if (data[x].characterDirection == "Right") {
-
-                pic1.setAttribute("style", "transform: scaleX(-1)");
-            }
-            pic2.setAttribute("src", data[y].image);
-            if (data[y].characterDirection == "Left") {
-
-                pic2.setAttribute("style", "transform: scaleX(-1)");
-            }
-
-
-        }
-    })
-    .catch((erreur) => ({ err: erreur }));
-
-
-
-/*
-    return fetchWhoami()
-        .then((response) => {
-
-
-
-            }
-
-
-        } 
-
-    function test() {
-
-
-    } 
-*/
-
-function verifyLogin() {
-
-    const key = document.getElementById("KEY").value;
-    const buttonConn = document.getElementById("connexion");
-    const navButton = document.getElementById("btn-open-login-modal");
-
-    return fetch("https://lifap5.univ-lyon1.fr/whoami", { method: 'GET', headers: { "x-api-key": key } })
+    return fetch("https://lifap5.univ-lyon1.fr/citations", {
+            method: 'GET',
+            headers: { "x-api-key": apiKey }
+        })
         .then((response) => response.json())
         .then(data => {
 
             console.log(data)
-            document.getElementById("btn-open-login-modal").innerHTML = data.login;
-            document.getElementById("elt-affichage-login").innerHTML = "User: " + data.login;
-            document.getElementById("connexion").innerHTML = "Deconnexion";
+            if (data.length > 0) {
+
+                data.forEach((u) => {
+
+                    tableBody += "<tr>";
+                    tableBody += "<td>" + ++classement + "</td>";
+                    tableBody += "<td>" + u.character + "</td>";
+                    tableBody += "<td id=\"test\" style=display:none> " + u._id + " </td>";
+                    tableBody += "<td id=\"baba\" onclick=\"afficheDetails()\">" + u.quote + "</td></tr>";
+
+                })
+                document.getElementById("data").innerHTML = tableBody;
+            }
+        })
+        .catch((erreur) => ({ err: erreur }));
+}
+
+// Affichage d’un duel aléatoire sur le tab Voter
+
+function afficheDuels() {
+
+    console.log("CALL afficheDuels");
+
+    const pic1 = document.getElementById("pic1");
+    const pic2 = document.getElementById("pic2");
+    const quote1 = document.getElementById("quote1");
+    const quote2 = document.getElementById("quote2");
+    const char1 = document.getElementById("author1");
+    const char2 = document.getElementById("author2");
+
+    return fetch("https://lifap5.univ-lyon1.fr/citations", {
+            method: 'GET',
+            headers: { "x-api-key": apiKey }
+        })
+        .then((response) => response.json())
+        .then(data => {
+
+            console.log(data)
+            if (data.length > 0) {
+
+                const x = Math.floor(Math.random() * data.length);
+                const y = Math.floor(Math.random() * data.length);
+
+
+                quote1.innerHTML = data[x].quote;
+                quote2.innerHTML = data[y].quote;
+                char1.innerHTML = data[x].character + " dans " + data[x].origin;
+                char2.innerHTML = data[y].character + " dans " + data[y].origin;
+
+                pic1.setAttribute("src", data[x].image);
+                if (data[x].characterDirection == "Right") {
+
+                    pic1.setAttribute("style", "transform: scaleX(-1)");
+                }
+                pic2.setAttribute("src", data[y].image);
+                if (data[y].characterDirection == "Left") {
+
+                    pic2.setAttribute("style", "transform: scaleX(-1)");
+                }
+            }
+        })
+        .catch((erreur) => ({ err: erreur }));
+}
+
+/**
+ * Fait une requête GET authentifiée sur /whoami avec la apiKey saisie.
+ * Change l'affichage du bouton Utilisateur pour afficher le numéro étudiant.
+ * Ajoute un bouton Déconnexion.
+ */
+function verifyLogin() {
+
+    console.log("CALL verifyLogin");
+    const key = document.getElementById("KEY").value;
+    const buttonConn = document.getElementById("connexion");
+    const navButton = document.getElementById("btn-open-login-modal");
+    const loginModalBody = document.getElementById("elt-affichage-login");
+
+    return fetch("https://lifap5.univ-lyon1.fr/whoami", {
+            method: 'GET',
+            headers: { "x-api-key": key }
+        })
+        .then((response) => response.json())
+        .then(data => {
+
+            console.log(data)
+            navButton.innerHTML = data.login;
+            loginModalBody.innerHTML = "User: " + data.login;
+            buttonConn.innerHTML = "Deconnexion";
             buttonConn.setAttribute("class", "button is-danger");
-            document.getElementById("KEY").remove();
+            buttonConn.setAttribute("id", "disconnect");
+            key.remove();
             modalClose("mdl-login");
             navButton.setAttribute("class", "button is-primary is-rounded");
 
+            console.log("Logged in as " + data.login);
 
         })
         .catch(err => (console.log(err)));
-
 }
 
 function disconnButton() {
 
-    // onclick disconnect on "Deconnexion"
+    const key = document.getElementById("KEY").value;
 
 
+    document.getElementById("disconnect").onclick = () =>
+        key.add();
 
-
+    //create function for getting id to call here
 
 }
 
 
-
-/* 
-fetch("https://lifap5.univ-lyon1.fr/citations/duels", { method: 'POST', headers: { "x-api-key": apiKey } })
-    .then((response) => response.json())
-    .then(data => {
-
-        console.log(data)
-        console.log("hi")
-    }); */
-
-
-
-
-// Affiche details de chaque citations sur un modal avec Hover
-
+/**
+ * Affiche les details de chaque citation cliqué dans un modal
+ * en utilisant /citation/{citation._id}
+ */
 function afficheDetails() {
 
-
-    // find how to get citationID with every hover = onmouseover
-    console.log("im here");
+    console.log("CALL afficheDetails");
     const citationID = document.getElementById("test").innerText;
     console.log(citationID);
 
-
-
-    return fetch("https://lifap5.univ-lyon1.fr/citations/" + citationID, { method: 'GET', headers: { "x-api-key": apiKey } })
+    return fetch("https://lifap5.univ-lyon1.fr/citations/" + citationID, {
+            method: 'GET',
+            headers: { "x-api-key": apiKey }
+        })
         .then(response => response.json())
         .then(data => {
-
-
             // affiche all except ID and Scores
-
             console.log(data);
             const imageC = document.getElementById("imageC");
-
             document.getElementById("quoteC").innerHTML = data.quote;
             document.getElementById("characterC").innerHTML = data.character;
             imageC.setAttribute("src", data.image);
@@ -370,9 +356,6 @@ function afficheDetails() {
             document.getElementById().innerHTML = data.characterDirection;
             document.getElementById().innerHTML = data.addedBy;
         })
-
-
-
 }
 
 // tri du tableau
@@ -383,19 +366,20 @@ function sortTab() {
 
 }
 
+// Ouvre le modal passé en paramètre.
 
 function modalOpen(element) {
 
     console.log("modalOpen: " + element);
     document.getElementById(element).classList.add('is-active');
 
-
 }
+
+// Ferme le modal passé en paramètre.
 
 function modalClose(element) {
 
     console.log("modalClose: " + element);
     document.getElementById(element).classList.remove('is-active');
-
 
 }

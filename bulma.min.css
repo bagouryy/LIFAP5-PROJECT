@@ -23,6 +23,10 @@
     height: 250px;
 }
 
+.input {
+    border: 100px;
+}
+
 .breadcrumb,
 .button,
 .delete,
@@ -12381,5 +12385,3 @@ print {
     background-color: #fafafa;
     padding: 3rem 1.5rem 6rem
 }
-
-;
