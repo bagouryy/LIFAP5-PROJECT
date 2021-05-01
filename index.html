@@ -1,0 +1,140 @@
+<html>
+
+<head>
+    <title>Duels de citations</title>
+    <link rel="stylesheet" href="bulma.min.css" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-end">
+            <div class="navbar-item">
+
+                <div class="buttons">
+                    <a id="btn-open-login-modal" class="button is-light">
+              Utilisateur
+            </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <h1 class="title">Duels de citations</h1>
+            <p class="subtitle">Quelle est votre citation favorite?</p>
+        </div>
+    </section>
+    <section class="section">
+        <div class="tabs is-centered">
+            <ul>
+                <li class="is-active" id="tab-duel">
+                    <a>Voter</a>
+                </li>
+                <li id="tab-tout"><a>Toutes les citations</a></li>
+            </ul>
+        </div>
+        <div class="columns" id="div-duel">
+            <div class="column">
+                <div class="card">
+                    <div class="columns card-content">
+                        <div class="column is-one-third">
+                            <div class="card-image">
+                                <figure class="image">
+                                    <img id="pic1" src="" />
+                                </figure>
+                            </div>
+                        </div>
+                        <div class="column is-8">
+                            <p class="title" id="quote1"></p>
+                            <p class="subtitle" id="author1"></p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="columns is-centered">
+                            <p class="button is-danger">
+                                Voter pour la citation de gauche !
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="card">
+                    <div class="columns card-content">
+                        <div class="column is-8">
+                            <p class="title" id="quote2"></p>
+                            <p class="subtitle" id="author2"></p>
+                        </div>
+                        <div class="column is-one-third">
+                            <div class="card-image">
+                                <figure class="image">
+                                    <img id="pic2" src="" />
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="columns is-centered">
+                            <p class="button is-info">Voter pour la citation de droite !</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="div-tout">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Classement</th>
+                        <th>Personnage</th>
+                        <th>Citation</th>
+                    </tr>
+                </thead>
+                <tbody id="data">
+
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <div id="mdl-login" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Utilisateur</p>
+                <button id="btn-close-login-modal1" class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <p id="elt-affichage-login">
+
+                    ApiKey:
+                </p>
+            </section>
+            <input id="KEY" class="input " type="password" placeholder="Password ">
+            <footer class="modal-card-foot " style="justify-content: flex-end">
+                <button id="btn-close-login-modal2" class="button">Fermer</button>
+                <button id="connexion" class="button is-success" onclick="verifyLogin()">Connexion</button>
+            </footer>
+        </div>
+    </div>
+    <div id="details" class="modal">
+        <div class="modal-card"></div>
+        <div class="modal-content">
+            <div class="image-popup">
+                <img id="imageC" src=""></img>
+            </div>
+            <h1>Quote</h1>
+            <p id="quoteC"></p>
+            <h1>Character</h1>
+            <p id="characterC"></p>
+            <h1>Origin</h1>
+            <p id="originC"></p>
+
+        </div>
+        <button class="modal-close is-large " aria-label="close "></button>
+    </div>
+    <script src=" client.js "></script>
+</body>
+
+</html>
