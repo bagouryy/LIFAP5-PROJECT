@@ -25,22 +25,27 @@ function majTab(etatCourant) {
     console.log("CALL majTab");
     const dDuel = document.getElementById("div-duel");
     const dTout = document.getElementById("div-tout");
-    const dAdd = document.getElementById("div-add");
     const tDuel = document.getElementById("tab-duel");
     const tTout = document.getElementById("tab-tout");
     const tAdd = document.getElementById("tab-add");
+    const dAdd = document.getElementById("div-add");
 
     if (etatCourant.tab === "duel") {
         dDuel.style.display = "flex";
         tDuel.classList.add("is-active");
         dTout.style.display = "none";
         tTout.classList.remove("is-active");
+        tAdd.classList.remove("is-active");
+
     } else {
         dTout.style.display = "flex";
         tTout.classList.add("is-active");
         dDuel.style.display = "none";
         tDuel.classList.remove("is-active");
+        tAdd.classList.remove("is-active");
     }
+    document.getElementById("tab-add").onclick = () =>
+        majAddTab();
 }
 
 /**
@@ -70,8 +75,8 @@ function registerTabClick(etatCourant) {
         clickTab("duel", etatCourant);
     document.getElementById("tab-tout").onclick = () =>
         clickTab("tout", etatCourant);
-    document.getElementById("tab-add").onclick = () =>
-        clickTab("add", etatCourant);
+    /* document.getElementById("tab-add").onclick = () =>
+        clickTab("add", etatCourant); */
 }
 
 /* ******************************************************************
@@ -104,8 +109,27 @@ function lanceWhoamiEtInsereLogin() {
         }
         return ok;
     });
-}
+} */
 
+function majAddTab() {
+
+    const dAdd = document.getElementById("div-add");
+    const tAdd = document.getElementById("tab-add");
+    const dDuel = document.getElementById("div-duel");
+    const dTout = document.getElementById("div-tout");
+    const tDuel = document.getElementById("tab-duel");
+    const tTout = document.getElementById("tab-tout");
+
+    dAdd.style.display = "flex";
+    tAdd.classList.add("is-active");
+    dTout.style.display = "none";
+    tTout.classList.remove("is-active");
+    dDuel.style.display = "none";
+    tDuel.classList.remove("is-active");
+
+
+
+}
 /**
  * Affiche ou masque la fenêtre modale de login en fonction de l'état courant.
  *
@@ -211,64 +235,75 @@ function fetchCitations() {
         .then((response) => response.json())
 }
 
+function fillTable(data) {
+
+    var tableBody = ``;
+    var classement = 0;
+
+    if (data.length > 0) {
+        data.forEach((u) => {
+            tableBody += `<tr>`;
+            tableBody += `<td>` + ++classement + `</td>`;
+            tableBody += `<td>` + u.character + `</td>`;
+            tableBody += `<td id=${u._id} onclick=\"afficheDetails(this.id)\">` + u.quote + `</td></tr>`;
+        })
+        document.getElementById("data").innerHTML = tableBody;
+    }
+}
+
 /**
  * Utilise fetchCitations() pour récuperer les citations
- * puis les insère dans le tableau HTML.
+ * puis les insère dans le tableau avec fillTable().
  */
 function insertCitations() {
 
     console.log("CALL insertCitations");
-    var tableBody = ``;
-    var classement = 0;
-    fetchCitations().then(data => {
+    fetchCitations().then(data => fillTable(data));
 
-            if (data.length > 0) {
-                data.forEach((u) => {
-
-                    tableBody += `<tr>`;
-                    tableBody += `<td>` + ++classement + `</td>`;
-                    tableBody += `<td>` + u.character + `</td>`;
-                    //tableBody += `<td id=${u._id} style=display:none>` + u._id + `</td>`;
-                    tableBody += `<td id=${u._id} onclick=\"afficheDetails(this.id)\">` + u.quote + `</td></tr>`;
-                })
-                document.getElementById("data").innerHTML = tableBody;
-            }
-        })
-        .catch((erreur) => ({ err: erreur }));
 }
 
+
+function setDuelLeft(data) {
+
+    const pic1 = document.getElementById("pic1");
+    const quote1 = document.getElementById("quote1");
+    const char1 = document.getElementById("author1");
+    const x = Math.floor(Math.random() * data.length);
+
+    quote1.innerHTML = data[x].quote;
+    char1.innerHTML = data[x].character + " dans " + data[x].origin;
+    pic1.setAttribute("src", data[x].image);
+    if (data[x].characterDirection == "Right") {
+        pic1.setAttribute("style", "transform: scaleX(-1)");
+    }
+
+}
+
+function setDuelRight(data) {
+
+    const pic1 = document.getElementById("pic2");
+    const quote1 = document.getElementById("quote2");
+    const char1 = document.getElementById("author2");
+    const x = Math.floor(Math.random() * data.length);
+
+    quote1.innerHTML = data[x].quote;
+    char1.innerHTML = data[x].character + " dans " + data[x].origin;
+    pic1.setAttribute("src", data[x].image);
+    if (data[x].characterDirection == "Right") {
+        pic1.setAttribute("style", "transform: scaleX(-1)");
+    }
+
+}
 // Affichage d’un duel aléatoire sur le tab Voter
 
 function afficheDuels() {
 
     console.log("CALL afficheDuels");
-
-    const pic1 = document.getElementById("pic1");
-    const pic2 = document.getElementById("pic2");
-    const quote1 = document.getElementById("quote1");
-    const quote2 = document.getElementById("quote2");
-    const char1 = document.getElementById("author1");
-    const char2 = document.getElementById("author2");
-
     fetchCitations().then(data => {
 
-            console.log(data)
             if (data.length > 0) {
-
-                const x = Math.floor(Math.random() * data.length);
-                const y = Math.floor(Math.random() * data.length);
-                quote1.innerHTML = data[x].quote;
-                quote2.innerHTML = data[y].quote;
-                char1.innerHTML = data[x].character + " dans " + data[x].origin;
-                char2.innerHTML = data[y].character + " dans " + data[y].origin;
-                pic1.setAttribute("src", data[x].image);
-                if (data[x].characterDirection == "Right") {
-                    pic1.setAttribute("style", "transform: scaleX(-1)");
-                }
-                pic2.setAttribute("src", data[y].image);
-                if (data[y].characterDirection == "Left") {
-                    pic2.setAttribute("style", "transform: scaleX(-1)");
-                }
+                setDuelLeft(data);
+                setDuelRight(data);
             }
         })
         .catch((erreur) => ({ err: erreur }));
@@ -287,7 +322,6 @@ function verifyLogin() {
     const navButton = document.getElementById("btn-open-login-modal");
     const loginModalBody = document.getElementById("elt-affichage-login");
 
-    console.log("is an " + typeof(fetchWhoami()));
     fetchWhoami().then(data => {
 
             navButton.innerHTML = data.login;
@@ -322,22 +356,22 @@ function disconnButton() {
  */
 function fetchCId(cId) {
 
-    const ID = cId;
+    //const ID = cId;
     console.log("CALL fetchCId");
-    const citationID = document.getElementById(ID).id;
+    const citationID = document.getElementById(cId).id;
     console.log(citationID);
 
-    fetch(serverUrl + "citations/" + citationID, {
+    return fetch(serverUrl + "citations/" + citationID, {
             method: 'GET',
             headers: { "x-api-key": apiKey }
         })
         .then(response => response.json())
-        .then(data => {
+        /* .then(data => {
 
             console.log(data);
             console.log("Fetched succesfully");
 
-        })
+        }) */
 }
 /**
  * Affiche les details de chaque citation cliqué dans un modal
@@ -348,9 +382,7 @@ function fetchCId(cId) {
 function afficheDetails(cId) {
 
     console.log("CALL afficheDetails");
-    console.log("cId is a: " + typeof(cId));
-    console.log(cId);
-    console.log(fetchCId(cId));
+    console.log("is an " + fetchCId(cId));
     fetchCId(cId).then(data => {
 
         console.log(data + "here");
