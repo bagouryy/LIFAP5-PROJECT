@@ -16,7 +16,7 @@ const serverUrl = "http://lifap5.univ-lyon1.fr/";
  ******************************************************************** */
 
 /**
- * Affiche/masque les divs "div-duel" et "div-tout" 
+ * Affiche/masque les divs "div-duel", "div-tout", "div-add"
  * selon le tab indiqué dans l'état courant.
  *
  * @param {Etat} etatCourant l'état courant
@@ -25,8 +25,11 @@ function majTab(etatCourant) {
     console.log("CALL majTab");
     const dDuel = document.getElementById("div-duel");
     const dTout = document.getElementById("div-tout");
+    const dAdd = document.getElementById("div-add");
     const tDuel = document.getElementById("tab-duel");
     const tTout = document.getElementById("tab-tout");
+    const tAdd = document.getElementById("tab-add");
+
     if (etatCourant.tab === "duel") {
         dDuel.style.display = "flex";
         tDuel.classList.add("is-active");
@@ -67,6 +70,8 @@ function registerTabClick(etatCourant) {
         clickTab("duel", etatCourant);
     document.getElementById("tab-tout").onclick = () =>
         clickTab("tout", etatCourant);
+    document.getElementById("tab-add").onclick = () =>
+        clickTab("add", etatCourant);
 }
 
 /* ******************************************************************
@@ -81,14 +86,6 @@ function registerTabClick(etatCourant) {
 function fetchWhoami() {
     return fetch(serverUrl + "whoami", { headers: { "x-api-key": apiKey } })
         .then((response) => response.json())
-        .then((data) => console.log(data))
-        .then((jsonData) => {
-            if (jsonData.status && Number(jsonData.status) != 200) {
-                return { err: jsonData.message };
-            }
-            return jsonData;
-        })
-        .catch((erreur) => ({ err: erreur }));
 }
 
 /**
@@ -118,7 +115,7 @@ function majModalLogin(etatCourant) {
     const modalClasses = document.getElementById("mdl-login").classList;
     if (etatCourant.loginModal) {
         modalClasses.add("is-active");
-        lanceWhoamiEtInsereLogin();
+        //lanceWhoamiEtInsereLogin();
     } else {
         modalClasses.remove("is-active");
     }
@@ -192,7 +189,7 @@ function initClientCitations() {
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Exécution du code après chargement de la page");
     initClientCitations();
-    getCitations();
+    insertCitations();
     afficheDuels();
 });
 
@@ -201,32 +198,38 @@ document.addEventListener("DOMContentLoaded", () => {
 /* il faudra générer dynamiquement le tableau HTML.
  Par exemple avec un `.map` qui va transformer chaque citation en string contenant la ligne du tableau HTML, 
  puis en utilisant `join("")` pour assembler toutes les chaînes en une seule */
+/**
+ * Récupere toutes les citations du serveur 
+ * en utilisant fetch et les formattent avec JSON
+ */
+function fetchCitations() {
 
-function getCitations() {
-
-
-    console.log("CALL getCitations");
-    var tableBody = "";
-    var classement = 0;
-
-    return fetch("https://lifap5.univ-lyon1.fr/citations", {
+    return fetch(serverUrl + "citations", {
             method: 'GET',
             headers: { "x-api-key": apiKey }
         })
         .then((response) => response.json())
-        .then(data => {
+}
 
-            console.log(data)
+/**
+ * Utilise fetchCitations() pour récuperer les citations
+ * puis les insère dans le tableau HTML.
+ */
+function insertCitations() {
+
+    console.log("CALL insertCitations");
+    var tableBody = ``;
+    var classement = 0;
+    fetchCitations().then(data => {
+
             if (data.length > 0) {
-
                 data.forEach((u) => {
 
-                    tableBody += "<tr>";
-                    tableBody += "<td>" + ++classement + "</td>";
-                    tableBody += "<td>" + u.character + "</td>";
-                    tableBody += "<td id=\"test\" style=display:none> " + u._id + " </td>";
-                    tableBody += "<td id=\"baba\" onclick=\"afficheDetails()\">" + u.quote + "</td></tr>";
-
+                    tableBody += `<tr>`;
+                    tableBody += `<td>` + ++classement + `</td>`;
+                    tableBody += `<td>` + u.character + `</td>`;
+                    //tableBody += `<td id=${u._id} style=display:none>` + u._id + `</td>`;
+                    tableBody += `<td id=${u._id} onclick=\"fetchCId(this.id)\">` + u.quote + `</td></tr>`;
                 })
                 document.getElementById("data").innerHTML = tableBody;
             }
@@ -247,33 +250,23 @@ function afficheDuels() {
     const char1 = document.getElementById("author1");
     const char2 = document.getElementById("author2");
 
-    return fetch("https://lifap5.univ-lyon1.fr/citations", {
-            method: 'GET',
-            headers: { "x-api-key": apiKey }
-        })
-        .then((response) => response.json())
-        .then(data => {
+    fetchCitations().then(data => {
 
             console.log(data)
             if (data.length > 0) {
 
                 const x = Math.floor(Math.random() * data.length);
                 const y = Math.floor(Math.random() * data.length);
-
-
                 quote1.innerHTML = data[x].quote;
                 quote2.innerHTML = data[y].quote;
                 char1.innerHTML = data[x].character + " dans " + data[x].origin;
                 char2.innerHTML = data[y].character + " dans " + data[y].origin;
-
                 pic1.setAttribute("src", data[x].image);
                 if (data[x].characterDirection == "Right") {
-
                     pic1.setAttribute("style", "transform: scaleX(-1)");
                 }
                 pic2.setAttribute("src", data[y].image);
                 if (data[y].characterDirection == "Left") {
-
                     pic2.setAttribute("style", "transform: scaleX(-1)");
                 }
             }
@@ -289,19 +282,13 @@ function afficheDuels() {
 function verifyLogin() {
 
     console.log("CALL verifyLogin");
-    const key = document.getElementById("KEY").value;
+    const key = document.getElementById("KEY");
     const buttonConn = document.getElementById("connexion");
     const navButton = document.getElementById("btn-open-login-modal");
     const loginModalBody = document.getElementById("elt-affichage-login");
 
-    return fetch("https://lifap5.univ-lyon1.fr/whoami", {
-            method: 'GET',
-            headers: { "x-api-key": key }
-        })
-        .then((response) => response.json())
-        .then(data => {
+    fetchWhoami().then(data => {
 
-            console.log(data)
             navButton.innerHTML = data.login;
             loginModalBody.innerHTML = "User: " + data.login;
             buttonConn.innerHTML = "Deconnexion";
@@ -310,9 +297,7 @@ function verifyLogin() {
             key.remove();
             modalClose("mdl-login");
             navButton.setAttribute("class", "button is-primary is-rounded");
-
             console.log("Logged in as " + data.login);
-
         })
         .catch(err => (console.log(err)));
 }
@@ -329,33 +314,48 @@ function disconnButton() {
 
 }
 
-
 /**
- * Affiche les details de chaque citation cliqué dans un modal
- * en utilisant /citation/{citation._id}
+ * Récupere l'Id de la citation cliqué et appel afficheDetails()
+ * pour insérer les details de la citation dans un modal.
+ * @param cId Id de la citation.
  */
-function afficheDetails() {
+function fetchCId(cId) {
 
-    console.log("CALL afficheDetails");
-    const citationID = document.getElementById("test").innerText;
+    console.log("CALL fetchCId");
+    const citationID = document.getElementById(cId).id;
     console.log(citationID);
 
-    return fetch("https://lifap5.univ-lyon1.fr/citations/" + citationID, {
+    fetch(serverUrl + "citations/" + citationID, {
             method: 'GET',
             headers: { "x-api-key": apiKey }
         })
         .then(response => response.json())
         .then(data => {
-            // affiche all except ID and Scores
+
             console.log(data);
-            const imageC = document.getElementById("imageC");
-            document.getElementById("quoteC").innerHTML = data.quote;
-            document.getElementById("characterC").innerHTML = data.character;
-            imageC.setAttribute("src", data.image);
-            document.getElementById("originC").innerHTML = data.origin;
-            document.getElementById().innerHTML = data.characterDirection;
-            document.getElementById().innerHTML = data.addedBy;
+            //afficheDetails(data);
+            console.log("Fetched succesfully");
         })
+}
+/**
+ * Affiche les details de chaque citation cliqué dans un modal
+ * en utilisant la route /citation/{citation_id} 
+ * fourni par fetchCId().
+ * @param cId Id de la citation.
+ */
+function afficheDetails(cId) {
+
+    console.log("CALL afficheDetails");
+    fetchCId(cId).then(data => {
+        console.log(data + "here");
+        const imageC = document.getElementById("imageC");
+        document.getElementById("quoteC").innerHTML = data.quote;
+        document.getElementById("characterC").innerHTML = data.character;
+        imageC.setAttribute("src", data.image);
+        document.getElementById("originC").innerHTML = data.origin;
+        document.getElementById().innerHTML = data.characterDirection;
+        document.getElementById().innerHTML = data.addedBy;
+    })
 }
 
 // tri du tableau
@@ -373,6 +373,7 @@ function modalOpen(element) {
     console.log("modalOpen: " + element);
     document.getElementById(element).classList.add('is-active');
 
+
 }
 
 // Ferme le modal passé en paramètre.
@@ -381,5 +382,6 @@ function modalClose(element) {
 
     console.log("modalClose: " + element);
     document.getElementById(element).classList.remove('is-active');
+
 
 }
