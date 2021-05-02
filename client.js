@@ -229,7 +229,7 @@ function insertCitations() {
                     tableBody += `<td>` + ++classement + `</td>`;
                     tableBody += `<td>` + u.character + `</td>`;
                     //tableBody += `<td id=${u._id} style=display:none>` + u._id + `</td>`;
-                    tableBody += `<td id=${u._id} onclick=\"fetchCId(this.id)\">` + u.quote + `</td></tr>`;
+                    tableBody += `<td id=${u._id} onclick=\"afficheDetails(this.id)\">` + u.quote + `</td></tr>`;
                 })
                 document.getElementById("data").innerHTML = tableBody;
             }
@@ -287,6 +287,7 @@ function verifyLogin() {
     const navButton = document.getElementById("btn-open-login-modal");
     const loginModalBody = document.getElementById("elt-affichage-login");
 
+    console.log("is an " + typeof(fetchWhoami()));
     fetchWhoami().then(data => {
 
             navButton.innerHTML = data.login;
@@ -321,8 +322,9 @@ function disconnButton() {
  */
 function fetchCId(cId) {
 
+    const ID = cId;
     console.log("CALL fetchCId");
-    const citationID = document.getElementById(cId).id;
+    const citationID = document.getElementById(ID).id;
     console.log(citationID);
 
     fetch(serverUrl + "citations/" + citationID, {
@@ -333,8 +335,8 @@ function fetchCId(cId) {
         .then(data => {
 
             console.log(data);
-            //afficheDetails(data);
             console.log("Fetched succesfully");
+
         })
 }
 /**
@@ -346,15 +348,20 @@ function fetchCId(cId) {
 function afficheDetails(cId) {
 
     console.log("CALL afficheDetails");
+    console.log("cId is a: " + typeof(cId));
+    console.log(cId);
+    console.log(fetchCId(cId));
     fetchCId(cId).then(data => {
+
         console.log(data + "here");
         const imageC = document.getElementById("imageC");
         document.getElementById("quoteC").innerHTML = data.quote;
         document.getElementById("characterC").innerHTML = data.character;
         imageC.setAttribute("src", data.image);
         document.getElementById("originC").innerHTML = data.origin;
-        document.getElementById().innerHTML = data.characterDirection;
-        document.getElementById().innerHTML = data.addedBy;
+        console.log("INSERTED SUCESSFULLY")
+            //document.getElementById().innerHTML = data.characterDirection;
+            //document.getElementById().innerHTML = data.addedBy;
     })
 }
 
