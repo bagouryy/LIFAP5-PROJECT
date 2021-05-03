@@ -75,8 +75,6 @@ function registerTabClick(etatCourant) {
         clickTab("duel", etatCourant);
     document.getElementById("tab-tout").onclick = () =>
         clickTab("tout", etatCourant);
-    /* document.getElementById("tab-add").onclick = () =>
-        clickTab("add", etatCourant); */
 }
 
 /* ******************************************************************
@@ -94,22 +92,8 @@ function fetchWhoami() {
 }
 
 /**
- * Fait une requête sur le serveur et insère le login dans
- * la modale d'affichage de l'utilisateur.
- * @returns Une promesse de mise à jour
-
-function lanceWhoamiEtInsereLogin() {
-    return fetchWhoami().then((data) => {
-        const elt = document.getElementById("elt-affichage-login");
-        const ok = data.err === undefined;
-        if (!ok) {
-            elt.innerHTML = `<span class="is-error">${data.err}</span>`;
-        } else {
-            elt.innerHTML = `Bonjour ${data.login}.`;
-        }
-        return ok;
-    });
-} */
+ * Gère l'affichage du tab Détails de citation
+ */
 
 function majAddTab() {
 
@@ -126,8 +110,6 @@ function majAddTab() {
     tTout.classList.remove("is-active");
     dDuel.style.display = "none";
     tDuel.classList.remove("is-active");
-
-
 
 }
 /**
@@ -218,13 +200,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// Récupère la liste de toutes les citations sur le serveur en utilisant fetch
-/* il faudra générer dynamiquement le tableau HTML.
- Par exemple avec un `.map` qui va transformer chaque citation en string contenant la ligne du tableau HTML, 
- puis en utilisant `join("")` pour assembler toutes les chaînes en une seule */
 /**
  * Récupere toutes les citations du serveur 
  * en utilisant fetch et les formattent avec JSON
+ * @returns la complèteliste complète des citations.
  */
 function fetchCitations() {
 
@@ -235,19 +214,25 @@ function fetchCitations() {
         .then((response) => response.json())
 }
 
+/**
+ * Crée le tableau HTML.
+ * @param data promesse retourné par fetchCitations().
+ * @returns la liste complète des citations.
+ */
 function fillTable(data) {
 
-    var tableBody = ``;
+    var tabBody = ``;
     var classement = 0;
 
     if (data.length > 0) {
         data.forEach((u) => {
-            tableBody += `<tr>`;
-            tableBody += `<td>` + ++classement + `</td>`;
-            tableBody += `<td>` + u.character + `</td>`;
-            tableBody += `<td id=${u._id} onclick=\"afficheDetails(this.id)\">` + u.quote + `</td></tr>`;
+            tabBody += `<tr>`;
+            tabBody += `<td>` + ++classement + `</td>`;
+            tabBody += `<td>` + u.character + `</td>`;
+            tabBody += `<td id=${u._id} onclick=\"afficheDetails(this.id)\">`;
+            tabBody += u.quote + `</td></tr>`;
         })
-        document.getElementById("data").innerHTML = tableBody;
+        document.getElementById("data").innerHTML = tabBody;
     }
 }
 
@@ -262,7 +247,10 @@ function insertCitations() {
 
 }
 
-
+/**
+ * Met en place le duel à gauche en insérent dans l'HTML.
+ * @param data promesse retourné par fetchCitations().
+ */
 function setDuelLeft(data) {
 
     const pic1 = document.getElementById("pic1");
@@ -276,9 +264,12 @@ function setDuelLeft(data) {
     if (data[x].characterDirection == "Right") {
         pic1.setAttribute("style", "transform: scaleX(-1)");
     }
-
 }
 
+/**
+ * Met en place le duel à droite en insérent dans l'HTML.
+ * @param data promesse retourné par fetchCitations().
+ */
 function setDuelRight(data) {
 
     const pic1 = document.getElementById("pic2");
@@ -289,13 +280,14 @@ function setDuelRight(data) {
     quote1.innerHTML = data[x].quote;
     char1.innerHTML = data[x].character + " dans " + data[x].origin;
     pic1.setAttribute("src", data[x].image);
-    if (data[x].characterDirection == "Right") {
+    if (data[x].characterDirection == "Left") {
         pic1.setAttribute("style", "transform: scaleX(-1)");
     }
-
 }
-// Affichage d’un duel aléatoire sur le tab Voter
-
+/**
+ * Affiche les duels créent par setDuelRight() et setDuelLeft
+ * @param data promesse retourné par fetchCitations().
+ */
 function afficheDuels() {
 
     console.log("CALL afficheDuels");
@@ -337,41 +329,22 @@ function verifyLogin() {
         .catch(err => (console.log(err)));
 }
 
-function disconnButton() {
-
-    const key = document.getElementById("KEY").value;
-
-
-    document.getElementById("disconnect").onclick = () =>
-        key.add();
-
-    //create function for getting id to call here
-
-}
 
 /**
- * Récupere l'Id de la citation cliqué et appel afficheDetails()
- * pour insérer les details de la citation dans un modal.
+ * Récupére les details de chaque citation cliqué dans un modal
+ * en utilisant la route /citation/{citation_id} 
  * @param cId Id de la citation.
  */
 function fetchCId(cId) {
 
-    //const ID = cId;
     console.log("CALL fetchCId");
     const citationID = document.getElementById(cId).id;
-    console.log(citationID);
 
     return fetch(serverUrl + "citations/" + citationID, {
             method: 'GET',
             headers: { "x-api-key": apiKey }
         })
         .then(response => response.json())
-        /* .then(data => {
-
-            console.log(data);
-            console.log("Fetched succesfully");
-
-        }) */
 }
 /**
  * Affiche les details de chaque citation cliqué dans un modal
@@ -382,7 +355,6 @@ function fetchCId(cId) {
 function afficheDetails(cId) {
 
     console.log("CALL afficheDetails");
-    console.log("is an " + fetchCId(cId));
     fetchCId(cId).then(data => {
 
         console.log(data + "here");
@@ -392,35 +364,30 @@ function afficheDetails(cId) {
         imageC.setAttribute("src", data.image);
         document.getElementById("originC").innerHTML = data.origin;
         console.log("INSERTED SUCESSFULLY")
-            //document.getElementById().innerHTML = data.characterDirection;
-            //document.getElementById().innerHTML = data.addedBy;
+
     })
 }
 
-// tri du tableau
-
-function sortTab() {
-
-
-
-}
-
-// Ouvre le modal passé en paramètre.
+/** 
+ * Ouvre le modal passé en paramètre.
+ * @param element ID du modal
+ */
 
 function modalOpen(element) {
 
     console.log("modalOpen: " + element);
     document.getElementById(element).classList.add('is-active');
 
-
 }
 
-// Ferme le modal passé en paramètre.
+/** 
+ * Ferme le modal passé en paramètre.
+ * @param element ID du modal
+ */
 
 function modalClose(element) {
 
     console.log("modalClose: " + element);
     document.getElementById(element).classList.remove('is-active');
-
 
 }
